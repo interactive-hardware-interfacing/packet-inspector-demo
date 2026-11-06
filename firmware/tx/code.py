@@ -6,7 +6,7 @@
 # "sensor" values so the screen isn't static, but it's deterministic: the same
 # sequence every run, which is what we want for a tour demo.
 #
-# Payload layout (32 bytes, little-endian), shared across the demo family:
+# Payload layout (32 bytes, little-endian), see PROTOCOL.md:
 #   off 0   1B   magic      0xA5
 #   off 1   1B   version    0x01
 #   off 2   1B   node_id    this node's id (0x01)

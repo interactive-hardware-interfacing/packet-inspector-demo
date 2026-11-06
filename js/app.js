@@ -10,6 +10,8 @@
 
 import { Bridge, FIELD_MAP } from './bridge.js';
 import { SimBridge } from './sim.js';
+import { initViews } from './views.js';
+import { initInstall } from './install.js';
 
 const $ = s => document.querySelector(s);
 const logEl = $('#log');
@@ -144,7 +146,7 @@ async function start(useSim) {
   bridge = useSim ? new SimBridge() : new Bridge();
   bridge.onLine = onLine;
   bridge.onRaw = t => { if (!useSim) log(t); };
-  bridge.onClose = e => { log(`\n[closed] ${e?.message || ''}\n`); setStatus('Disconnected', false); setLink(false); bridge = null; };
+  bridge.onClose = e => { clearTimeout(gapFlashTimer); log(`\n[closed] ${e?.message || ''}\n`); setStatus('Disconnected', false); setLink(false); bridge = null; };
   try {
     log(useSim ? '[sim] starting\n' : '[serial] requesting port\n');
     await bridge.connect();
@@ -155,6 +157,7 @@ async function start(useSim) {
 }
 
 async function stop() {
+  clearTimeout(gapFlashTimer);
   if (bridge) { try { await bridge.disconnect(); } catch {} }
   bridge = null;
   setStatus('Not connected', false); setLink(false);
@@ -174,6 +177,18 @@ $('#logsend').addEventListener('click', async () => {
   if (simulated || !bridge) { log('(no command sent)\n'); return; }
   try { await bridge.send(cmd); log('→ ' + cmd + '\n'); } catch (e) { log('[error] ' + e.message + '\n'); }
 });
+
+// ---- doc views + firmware install ----
+const views = initViews(
+  $('#instrument'),
+  { hardware: $('#hardware'), firmware: $('#firmware'), about: $('#about') },
+  [...document.querySelectorAll('nav a[data-view]')],
+);
+initInstall({
+  installBridge: $('#fwInstallBridge'), installTx: $('#fwInstallTx'), status: $('#fwStatus'), bar: $('#fwBar'), log: $('#fwLog'), noRepl: $('#fwNoRepl'),
+  cpFile: $('#cpFile'), cpLoad: $('#cpLoad'), cpName: $('#cpName'), cpFlash: $('#cpFlash'),
+}, { releaseSerial: async () => { if (bridge && !simulated) await stop(); } });
+void views;
 
 if (!navigator.serial) $('#nowebserial').hidden = false;
 setStatus('Not connected', false);

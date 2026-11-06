@@ -2,9 +2,7 @@
 #
 # Runs on a XIAO ESP32-C3 in CircuitPython, tethered to the laptop over USB.
 # Receives ESP-NOW packets and prints ONE JSON line per packet to USB serial.
-# This is the shared bridge format for the whole demo family — rssi-demo,
-# telemetry-demo, morse-key-demo and wireless-address-demo reuse it, changing
-# only how the page decodes the payload.
+# The page decodes the payload; this file only frames it. See PROTOCOL.md.
 #
 # Line format (newline-terminated JSON), one per received packet:
 #   {"t":"pkt","seq":<u32|null>,"mac":"aabbcc...","rssi":-42,

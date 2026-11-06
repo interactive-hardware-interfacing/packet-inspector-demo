@@ -26,6 +26,7 @@ Runs `../firmware/tx/code.py`.
 
 ## Notes
 
-- Same hardware, different `code.py`. Label them BRIDGE and TX.
+- Same hardware, different `code.py`. Label them BRIDGE and TX. The page's
+  Firmware tab installs either role; a board is whichever it was last given.
 - Both pin Wi-Fi channel 6. Change one and you must change the other.
 - No level shifters, no jumpers.

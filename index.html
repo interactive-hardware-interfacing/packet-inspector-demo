@@ -5,21 +5,31 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Packet Inspector</title>
 <meta name="description" content="Watch ESP-NOW packets arrive between two XIAO ESP32-C3 boards: a live colored hex dump, decoded fields, and loss/RSSI counters, over Web Serial.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="wrap">
 
 <header>
+  <p class="eyebrow"><a href="https://interactive-hardware-interfacing.github.io/#wireless">Wireless communication</a> · demo</p>
   <h1>Packet Inspector</h1>
   <p class="tag">Watch wireless packets arrive, byte by byte — a “Wireshark lite” for ESP-NOW between two XIAO ESP32-C3 boards.</p>
-  <nav>
-    <a href="#firmware">Firmware</a>
-    <a href="#about">About</a>
+  <nav aria-label="Page">
+    <a href="#" data-view="" aria-current="page">Instrument</a>
+    <a href="#hardware" data-view="hardware" aria-current="false">Hardware</a>
+    <a href="#firmware" data-view="firmware" aria-current="false">Firmware</a>
+    <a href="#about" data-view="about" aria-current="false">About</a>
+    <span class="navsep" aria-hidden="true"></span>
     <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo">Source</a>
     <a href="https://interactive-hardware-interfacing.github.io/">All tools</a>
   </nav>
 </header>
+
+<!-- ================= INSTRUMENT ================= -->
+<div id="instrument">
 
 <div class="bar">
   <button id="connect" class="primary">Connect bridge</button>
@@ -55,42 +65,36 @@
   <div><div class="n" id="rssi">—</div><div class="k">last RSSI dBm</div></div>
 </div>
 
-<div class="panel" style="margin-top:16px">
-  <h2>Serial log</h2>
+<div class="termpanel">
+  <div class="termbar"><span class="dots"><i></i><i></i><i></i></span><span>serial log · 115200 8N1</span></div>
   <div id="log"></div>
   <div class="logbar">
     <input id="logcmd" placeholder="Line sent to the bridge (ignored in simulator)">
-    <button id="logsend">Send</button>
+    <button id="logsend" class="small">Send</button>
   </div>
 </div>
 
-<!-- ================= ABOUT ================= -->
-<section class="doc" id="about">
-  <h2>About this demo</h2>
+</div><!-- /instrument -->
 
-  <h3>What it shows</h3>
-  <p>
-    “Wireless” isn’t magic — it’s just bytes with a checksum. One board broadcasts a
-    fixed 32-byte packet a few times a second; a second board, plugged into the laptop,
-    catches each one and shows it here: the <strong>raw bytes</strong> (colored by field),
-    the <strong>decoded values</strong>, and how many packets arrive, how many go missing,
-    and how strong the signal is.
-  </p>
-  <p><strong>Try this during the tour:</strong> walk the sending board toward the back of the room and
-    watch <em>last RSSI</em> drop and the <em>loss</em> counter climb. Step between the two boards with your
-    body and the little dot flashes as packets go missing.</p>
+<!-- ================= HARDWARE ================= -->
+<section class="view" id="hardware" aria-label="Hardware" hidden>
+  <div class="viewhead">
+    <h2>Hardware</h2>
+    <p class="lede">Two identical boards, nothing wired between them, and which firmware goes on each.</p>
+    <button type="button" class="small" data-back>Back to instrument</button>
+  </div>
 
-  <h3>Hardware</h3>
+  <h3>Two boards</h3>
   <table>
     <tr><th>Role</th><th>Board</th><th>Extras</th><th>Power</th></tr>
-    <tr><td>Bridge (receiver)</td><td>XIAO ESP32-C3</td><td>u.FL antenna</td><td>Laptop USB-C</td></tr>
-    <tr><td>TX (sender)</td><td>XIAO ESP32-C3</td><td>u.FL antenna</td><td>USB bank / laptop</td></tr>
+    <tr><td>Bridge (receiver)</td><td>XIAO ESP32-C3 running <code>firmware/bridge</code></td><td>u.FL antenna</td><td>Laptop USB-C</td></tr>
+    <tr><td>TX (sender)</td><td>XIAO ESP32-C3 running <code>firmware/tx</code></td><td>u.FL antenna</td><td>USB bank / laptop</td></tr>
   </table>
-  <p class="tag">The bridge is the only board the browser talks to. The TX node is untethered so a volunteer can carry it.</p>
+  <p class="tag">The bridge is the only board the browser talks to. The TX node is untethered so a volunteer can carry it. A board is whichever firmware it was last given; the Firmware tab installs either.</p>
 
   <h3>Wiring</h3>
   <div class="wiringfig">
-    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230" font-family="system-ui, sans-serif" font-size="12">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 230" font-family="system-ui, sans-serif" font-size="12" role="img" aria-label="A laptop connects over USB-C to a XIAO ESP32-C3 bridge board with an antenna. A second XIAO ESP32-C3, the TX node, with its own antenna and USB power, sends to it over ESP-NOW at 2.4 GHz. Nothing is wired between the boards.">
       <style>
         .board { fill: var(--panel); stroke: var(--muted); stroke-width: 1.5; }
         .lbl { fill: var(--ink); } .mut { fill: var(--muted); }
@@ -129,44 +133,129 @@
     <tr><td>Antenna (both)</td><td>u.FL</td><td>Clip on firmly — the only antenna the C3 has</td></tr>
     <tr><td>TX power</td><td>USB-C</td><td>USB bank or a second laptop port</td></tr>
   </table>
-  <p class="tag">No level shifting, no jumpers. The two boards talk over the air; nothing is wired between them.</p>
+  <p class="tag">No level shifting, no jumpers, no breadboard. The two boards talk over the air; nothing is wired between them.</p>
+
+  <h3>Parts</h3>
+  <ul>
+    <li>2× Seeed XIAO ESP32-C3, each with the u.FL antenna that ships with it.</li>
+    <li>USB-C data cable for the bridge (not charge-only), and a USB bank or second cable for the TX node.</li>
+    <li>Two labels: BRIDGE and TX. The boards are identical; only the <code>code.py</code> differs.</li>
+  </ul>
+
+  <h3>Things that bite</h3>
+  <ul>
+    <li>If the antenna is loose, no packets arrive and the link shows LINK LOST. Check the u.FL first.</li>
+    <li>Both boards pin Wi-Fi channel 6. Change one firmware’s channel and you must change the other.</li>
+    <li>A bus-powered node can brown out on radio spikes — a decent USB bank helps.</li>
+    <li>Only one program can hold the serial port; close other serial monitors before Connect.</li>
+    <li>If a board won’t take firmware: hold <strong>BOOT</strong> (B), tap <strong>RESET</strong> (R), release BOOT, then try again.</li>
+    <li>If the chooser shows no port, the cable is the usual suspect — many USB-C cables are charge-only.</li>
+  </ul>
+  <p class="tag">The same tables live in <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/wiring/wiring.md">wiring/wiring.md</a>.</p>
+</section>
+
+<!-- ================= FIRMWARE ================= -->
+<section class="view" id="firmware" aria-label="Firmware" hidden>
+  <div class="viewhead">
+    <h2>Put the firmware on the boards</h2>
+    <p class="lede">Two roles, <code>bridge</code> and <code>tx</code>, each a single <code>code.py</code> written straight from this page. Chrome or Edge.</p>
+    <button type="button" class="small" data-back>Back to instrument</button>
+  </div>
+
+  <div class="steps">
+    <div class="step"><b>1. Plug in</b><p>Connect one XIAO ESP32-C3 over USB. If the instrument is connected to a board, this page disconnects it first.</p></div>
+    <div class="step"><b>2. Pick its job</b><p><b>Install bridge</b> for the board that stays at the laptop and receives. <b>Install TX</b> for the board that will broadcast. Pick the port named <em>USB JTAG/serial debug unit</em>.</p></div>
+    <div class="step"><b>3. Wait for the first line</b><p>The page writes <code>code.py</code> over CircuitPython’s REPL, checks its size and CRC on the board, reboots it, and waits for the firmware’s first line. Then do the other board.</p></div>
+    <div class="step"><b>4. Connect</b><p>Leave the bridge plugged in, power the TX node from a USB bank, go back to the instrument and click <b>Connect bridge</b>. Or skip all of this: <b>Try without hardware</b> runs the whole page on a simulator.</p></div>
+  </div>
+
+  <div class="panel fwpanel">
+    <div class="fwrow">
+      <button id="fwInstallBridge" class="primary">Install bridge</button>
+      <button id="fwInstallTx" class="primary">Install TX</button>
+      <span id="fwStatus" class="fwstatus">Ready. Plug a board in and pick its role.</span>
+    </div>
+    <progress id="fwBar" max="1" value="0" hidden></progress>
+    <div class="note" id="fwNoRepl" hidden>
+      <strong>No CircuitPython on that board.</strong> A XIAO ESP32-C3 fresh from the bag runs Seeed’s factory sketch, not CircuitPython. Install CircuitPython once with the button below, then come back to <b>Install bridge</b> or <b>Install TX</b>.
+    </div>
+    <div class="cpflash">
+      <h3>Bare board? Install CircuitPython first</h3>
+      <ol>
+        <li>Download the <b>.bin</b> (not the .uf2) for the XIAO ESP32-C3 from <a href="https://circuitpython.org/board/seeed_xiao_esp32c3/" target="_blank" rel="noopener">circuitpython.org</a>. The download site doesn’t let a page fetch it directly, so it’s a save-then-pick.</li>
+        <li><button id="cpLoad" class="small">Choose .bin…</button> <input type="file" id="cpFile" accept=".bin" hidden> <span id="cpName" class="tag">nothing chosen</span></li>
+        <li><button id="cpFlash" class="small" disabled>Flash CircuitPython</button> — erases the board and writes the image (about a minute). If the chip doesn’t answer, unplug, hold <b>BOOT</b> while plugging back in, and retry.</li>
+      </ol>
+      <p class="tag">This step uses <a href="https://github.com/espressif/esptool-js">esptool-js</a>, kept in <code>flasher/</code> under its own licence (Apache-2.0).</p>
+    </div>
+    <h3>Log</h3>
+    <div id="fwLog" class="fwlog" aria-live="polite"></div>
+  </div>
+
+  <details>
+    <summary>Doing it by hand instead</summary>
+    <ul>
+      <li><strong>Thonny:</strong> Tools → Options → Interpreter → <em>CircuitPython (generic)</em>, pick the port, open <code>firmware/bridge/code.py</code> or <code>firmware/tx/code.py</code>, then File → Save as… → <em>CircuitPython device</em>, name it <code>code.py</code>.</li>
+      <li><strong>CircuitPython from a terminal:</strong> <code>pip install esptool</code>, then <code>esptool.py --chip esp32c3 --port COMn erase_flash</code> and <code>esptool.py --chip esp32c3 --port COMn write_flash 0x0 adafruit-circuitpython-seeed_xiao_esp32c3-en_US-&lt;version&gt;.bin</code>.</li>
+      <li>The REPL exchange the page uses is written out in <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/PROTOCOL.md">PROTOCOL.md</a>.</li>
+    </ul>
+  </details>
+</section>
+
+<!-- ================= ABOUT ================= -->
+<section class="view" id="about" aria-label="About this demo" hidden>
+  <div class="viewhead">
+    <h2>About this demo</h2>
+    <p class="lede">What it shows, how to run it in front of a room, and how the bytes get from the air to this page.</p>
+    <button type="button" class="small" data-back>Back to instrument</button>
+  </div>
+
+  <h3>What it shows</h3>
+  <p>
+    “Wireless” isn’t magic — it’s just bytes with a checksum. One board broadcasts a
+    fixed 32-byte packet a few times a second; a second board, plugged into the laptop,
+    catches each one and shows it here: the <strong>raw bytes</strong> (colored by field),
+    the <strong>decoded values</strong>, and how many packets arrive, how many go missing,
+    and how strong the signal is.
+  </p>
+  <p><strong>Try this during the tour:</strong> walk the sending board toward the back of the room and
+    watch <em>last RSSI</em> drop and the <em>loss</em> counter climb. Step between the two boards with your
+    body and the little dot flashes as packets go missing. Hover a byte in the hex dump to show which field it belongs to.</p>
 
   <h3>How it works</h3>
   <p>
     TX broadcasts a 32-byte ESP-NOW packet → the bridge receives it, checks the CRC, and prints one
     line of JSON per packet over USB → this page parses that line and draws the hex dump, the decoded
     table, and the counters. The sequence number lets the page count gaps (lost packets); the radio
-    reports the RSSI. The bridge’s line format is the shared format for the whole demo family — see
+    reports the RSSI. The bridge’s line format and the payload layout are in
     <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/PROTOCOL.md">PROTOCOL.md</a>.
   </p>
   <p><strong>Known quirks:</strong></p>
   <ul>
-    <li>If the antenna is loose, no packets arrive and the link shows LINK LOST. Check the u.FL first.</li>
-    <li>Both boards must be on the same channel (6). The firmware pins it; don’t change one without the other.</li>
-    <li>If the board won’t take new firmware: hold <strong>BOOT</strong>, tap <strong>RESET</strong>, release <strong>BOOT</strong>.</li>
-    <li>A bus-powered node can brown out on radio spikes — a decent USB bank helps.</li>
-    <li>Only one program can hold the serial port; close other serial monitors.</li>
+    <li>Loss is counted from skipped sequence numbers, so a packet that arrives with a bad CRC counts as received <em>and</em> as a CRC fail, not as lost.</li>
+    <li>RSSI is whatever the radio reports for the last packet; it jumps around by a few dB even when nothing moves.</li>
+    <li>The simulator drops a sequence number now and then on purpose, so the loss counter has something to show.</li>
   </ul>
-</section>
 
-<!-- ================= FIRMWARE ================= -->
-<section class="doc" id="firmware">
-  <h2>Put the firmware on the boards</h2>
-  <p>One-time step per board. The XIAO C3 runs <strong>CircuitPython</strong>; you copy a <code>code.py</code> onto it.</p>
-  <ol class="steps">
-    <li><strong>Install CircuitPython</strong> on each XIAO ESP32-C3 if it isn’t already (see the <a href="https://circuitpython.org/board/seeed_xiao_esp32c3/">board page</a>). The C3 has no CIRCUITPY drive, so files go over the serial/web workflow.</li>
-    <li><strong>Bridge board:</strong> copy <code>firmware/bridge/code.py</code> onto it. This is the board you plug into the laptop.</li>
-    <li><strong>TX board:</strong> copy <code>firmware/tx/code.py</code> onto the other one. Power it from a USB bank.</li>
-    <li><strong>Connect.</strong> Plug the bridge into the laptop, scroll up, click <strong>Connect bridge</strong>, and pick the port named <em>USB JTAG/serial</em> (or <em>USB Serial Device</em> on Windows). The TX board just needs power.</li>
-  </ol>
-  <p class="tag">Label the boards “BRIDGE” and “TX” — they’re identical hardware, only the <code>code.py</code> differs. Keep a spare of each, pre-flashed.</p>
+  <h3>The pieces</h3>
+  <table>
+    <tr><th>Part</th><th>What it is</th></tr>
+    <tr><td><code>index.html</code>, <code>css/</code>, <code>js/</code></td><td>This page. No build step, no framework; view source and you have it.</td></tr>
+    <tr><td><code>js/bridge.js</code></td><td>Web Serial reader for the bridge’s line-JSON, and the field map that colours the hex dump.</td></tr>
+    <tr><td><code>js/sim.js</code></td><td>A fake bridge that builds the same packets, CRC and all.</td></tr>
+    <tr><td><code>js/device/</code>, <code>flasher/</code></td><td>The Firmware tab: CircuitPython raw REPL, and esptool-js for bare boards.</td></tr>
+    <tr><td><code>firmware/bridge/</code>, <code>firmware/tx/</code></td><td>One CircuitPython file per role.</td></tr>
+    <tr><td><code>PROTOCOL.md</code>, <code>wiring/</code></td><td>The serial contract, the payload layout, and the hookup.</td></tr>
+  </table>
+  <p class="tag">Part of <a href="https://interactive-hardware-interfacing.github.io/">Interactive Hardware Interfacing</a>.
+    GPL-2.0, except <code>flasher/</code> (Apache-2.0) — see <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/LICENSES.md">LICENSES.md</a>.</p>
 </section>
 
 <footer>
-  Packet Inspector v0.1.0 · Last updated 2026-11-04 · Part of
+  Packet Inspector v0.2.0 · Last updated 2026-11-06 · Part of
   <a href="https://interactive-hardware-interfacing.github.io/">Interactive Hardware Interfacing</a>.
   Works in Chrome and Edge via Web Serial.
-  <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/LICENSE">GPL-2.0</a>.
+  <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/LICENSE">GPL-2.0</a>, except <code>flasher/</code> — see <a href="https://github.com/interactive-hardware-interfacing/packet-inspector-demo/blob/main/LICENSES.md">LICENSES.md</a>.
   Maintained by <a href="https://github.com/LC-Linkous">LC Linkous</a>.
 </footer>
 
