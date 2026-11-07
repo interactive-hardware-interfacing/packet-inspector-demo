@@ -12,6 +12,8 @@ import { Bridge, FIELD_MAP } from './bridge.js';
 import { SimBridge } from './sim.js';
 import { initViews } from './views.js';
 import { initInstall } from './install.js';
+import { initPresenter } from './presenter.js';
+import { CaptureLogger, bindLogPanel } from './logger.js';
 
 const $ = s => document.querySelector(s);
 const logEl = $('#log');
@@ -130,10 +132,14 @@ function onLine(obj) {
   if (obj.hex) renderHex(obj.hex);
   renderDecoded(obj);
   refreshCounters();
+  logger.push('packets', [new Date().toISOString(), obj.seq, obj.mac, obj.rssi, obj.len, obj.crc_ok === false ? 0 : 1, obj.gap || 0,
+    ...FIELD_MAP.map(f => obj.fields?.[f.key]), obj.hex]);
 }
 
 // ---- connect / disconnect ----
 function setStatus(text, connected) {
+  if (!connected && logger.recording) logger.stop();
+  paintLog(logger);
   $('#status').textContent = text;
   $('#status').className = connected ? 'ok' : '';
   $('#connect').disabled = connected;
@@ -191,6 +197,17 @@ initInstall({
 void views;
 
 if (!navigator.serial) $('#nowebserial').hidden = false;
+// ---- presenter mode + data logging (declared before the first setStatus call) ----
+initPresenter($('#presenter'));
+const logger = new CaptureLogger({
+  packets: ['iso_time', 'seq', 'mac', 'rssi_dbm', 'len', 'crc_ok', 'gap', ...FIELD_MAP.map(f => 'f_' + f.key), 'hex'],
+}, 'packet-inspector-demo');
+const paintLog = bindLogPanel(logger, $, {
+  isConnected: () => !!bridge,
+  meta: () => ({ source: simulated ? 'simulator' : 'board', notes: 'packets.csv: one row per received packet. gap = packets missing before it; the f_* columns are the decoded fields from PROTOCOL.md; hex is the full 32-byte payload.' }),
+  log,
+});
+
 setStatus('Not connected', false);
 setLink(false);
 log('Ready. "Try without hardware" for the simulator, or "Connect bridge" with the bridge XIAO plugged in.\n');

@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Spline+Sans+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=0.2.0">
 </head>
 <body>
 <div class="wrap">
@@ -38,19 +38,20 @@
   <button id="reset">Reset counters</button>
   <span id="link" class="bad">LINK LOST</span>
   <span id="status">Not connected</span>
+  <button id="presenter" class="small" aria-pressed="false" title="Big and quiet, for the projector (P / Esc)">Presenter</button>
 </div>
 
-<div class="note" id="nowebserial" hidden>
+<div class="note" id="nowebserial" data-presenter="hide" hidden>
   This browser can’t open USB serial ports. Use <strong>Chrome</strong> or <strong>Edge</strong> on a laptop or desktop. <strong>Try without hardware</strong> works anywhere.
 </div>
 
 <div class="grid2">
-  <div class="panel">
+  <div class="panel" data-presenter="hero">
     <h2>Raw packet <span id="gapind" title="flashes when a sequence number is skipped"></span></h2>
     <div id="hex">—</div>
-    <p class="tag" style="margin-top:12px">32 bytes. Hover a byte or a row to see which field it is.</p>
+    <p class="tag" style="margin-top:12px" data-presenter="hide">32 bytes. Hover a byte or a row to see which field it is.</p>
   </div>
-  <div class="panel">
+  <div class="panel" data-presenter="hero">
     <h2>Decoded</h2>
     <table><tbody id="decoded"></tbody></table>
   </div>
@@ -65,7 +66,19 @@
   <div><div class="n" id="rssi">—</div><div class="k">last RSSI dBm</div></div>
 </div>
 
-<div class="termpanel">
+<div class="panel logpanel" data-presenter="hide">
+  <h2>Data logging</h2>
+  <div class="logrow">
+    <button id="recStart" class="primary" disabled>● Record</button>
+    <button id="recStop" disabled>■ Stop</button>
+    <button id="recDownload" disabled>Download .zip</button>
+    <span id="recStatus" class="recstatus"></span>
+    <span class="markgroup"><input id="recMarkLabel" placeholder="mark label, e.g. antenna off"><button id="recMark" class="small" disabled>Mark</button></span>
+  </div>
+  <p class="logfiles"><code>packets.csv</code> every packet: seq, MAC, RSSI, gap, CRC, every decoded field, and the raw hex · <code>marks.csv</code> labelled events. Kept in memory until you download.</p>
+</div>
+
+<div class="termpanel" data-presenter="hide">
   <div class="termbar"><span class="dots"><i></i><i></i><i></i></span><span>serial log · 115200 8N1</span></div>
   <div id="log"></div>
   <div class="logbar">
@@ -241,6 +254,7 @@
   <table>
     <tr><th>Part</th><th>What it is</th></tr>
     <tr><td><code>index.html</code>, <code>css/</code>, <code>js/</code></td><td>This page. No build step, no framework; view source and you have it.</td></tr>
+    <tr><td><code>js/logger.js</code>, <code>js/presenter.js</code></td><td>Data logging (CSV zip with marks) and presenter mode.</td></tr>
     <tr><td><code>js/bridge.js</code></td><td>Web Serial reader for the bridge’s line-JSON, and the field map that colours the hex dump.</td></tr>
     <tr><td><code>js/sim.js</code></td><td>A fake bridge that builds the same packets, CRC and all.</td></tr>
     <tr><td><code>js/device/</code>, <code>flasher/</code></td><td>The Firmware tab: CircuitPython raw REPL, and esptool-js for bare boards.</td></tr>
@@ -260,6 +274,6 @@
 </footer>
 
 </div>
-<script type="module" src="js/app.js"></script>
+<script type="module" src="js/app.js?v=0.2.0"></script>
 </body>
 </html>

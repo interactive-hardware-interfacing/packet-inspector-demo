@@ -55,6 +55,18 @@ pick it on the Firmware tab, click **Flash CircuitPython**. That path uses
 | `firmware/bridge/code.py`, `firmware/tx/code.py` | One CircuitPython file per role. |
 | `PROTOCOL.md`, `wiring/` | The serial contract, the payload layout, and the hookup. |
 
+## Logging data
+
+The **Data logging** panel records while connected (simulator included) and
+hands over one `.zip`: `packets.csv` (one row per packet: seq, MAC, RSSI,
+gap, CRC, every decoded field as `f_*`, and the raw 32-byte hex — a pcap-lite) and
+`marks.csv` (labelled events from the **Mark** box). Nothing touches disk
+until you click Download.
+
+**Presenter** (or press `P`) hides the log and settings and enlarges the hex
+dump and decoded table for a projector. `Esc` leaves it; the choice is
+remembered.
+
 ## Run locally
 
 ```
